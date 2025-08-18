@@ -29,7 +29,7 @@ public class PostController {
             @RequestParam(name = "category", required = false) Category category,
             @RequestParam(name = "page", required = false, defaultValue = "0") int page,
             @RequestParam(name = "size", required = false, defaultValue = "10") int size,
-            @RequestParam(name = "me", required = false) Long me,
+            @RequestParam(name = "me", required = false) String me,
             HttpServletRequest request
     ) {
         String path = request.getRequestURI();
@@ -44,7 +44,7 @@ public class PostController {
     @GetMapping("/{post_id}")
     public ResponseEntity<Response> get(
             @PathVariable(name = "post_id") Long id,
-            @RequestParam(name = "me", required = false) Long me
+            @RequestParam(name = "me", required = false) String me
     ) {
         return ResponseEntity.ok(postService.get(id, me));
     }
@@ -60,7 +60,7 @@ public class PostController {
     public ResponseEntity<Response> update(
             @PathVariable(name = "post_id") Long id,
             @RequestBody UpdateRequest req,
-            @RequestParam(name = "me") Long me
+            @RequestParam(name = "me") String me
     ) {
         return ResponseEntity.ok(postService.update(id, req, me));
     }
@@ -69,7 +69,7 @@ public class PostController {
     @DeleteMapping("/{post_id}")
     public ResponseEntity<Void> delete(
             @PathVariable(name = "post_id") Long id,
-            @RequestParam(name = "me") Long me
+            @RequestParam(name = "me") String me
     ) {
         postService.delete(id, me);
         return ResponseEntity.noContent().build();
@@ -79,7 +79,7 @@ public class PostController {
     @PostMapping("/{id}/like")
     public ResponseEntity<Integer> like(
             @PathVariable(name = "id") Long id,
-            @RequestParam(name = "me") Long me
+            @RequestParam(name = "me") String me
     ) {
         return ResponseEntity.ok(postService.like(id, me));
     }
@@ -88,7 +88,7 @@ public class PostController {
     @DeleteMapping("/{id}/like")
     public ResponseEntity<Integer> unlike(
             @PathVariable(name = "id") Long id,
-            @RequestParam(name = "me") Long me
+            @RequestParam(name = "me") String me
     ) {
         return ResponseEntity.ok(postService.unlike(id, me));
     }

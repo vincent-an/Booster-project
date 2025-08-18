@@ -3,12 +3,11 @@ package fortuneCookie.booster.domain.user.repository;
 import fortuneCookie.booster.domain.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
-
-    // ✅ userId 필드명 기반 파생 쿼리
-    Optional<User> findByUserId(Long userId);
-
     Optional<User> findByEmail(String email);
+
+    List<User> Email(String email);
 }

@@ -16,7 +16,7 @@ public class PostDtos {
         private String content;
         private Category category;
         private Boolean anonymous = false;
-        private Long userId; // 인증 연동 전 임시
+        private String email; // 인증 연동 전 임시
     }
 
     @Getter @Builder
@@ -73,7 +73,7 @@ public class PostDtos {
     public static class CommentCreateRequest {
         private String content;
         private Boolean anonymous = false;
-        private Long userId;
+        private String email;
     }
 
     @Getter @Builder

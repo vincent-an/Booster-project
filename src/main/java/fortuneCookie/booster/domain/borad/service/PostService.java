@@ -41,7 +41,7 @@ public class PostService {
     }
 
     public Response create(CreateRequest req) {
-        User author = userRepository.findByUserId(req.getUserId())
+        User author = userRepository.findByEmail(req.getEmail())
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "user not found"));
 
         Post post = Post.of(
@@ -57,7 +57,7 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<Response> list(String q, Category category, int page, int size, Long me) {
+    public PageResponse<Response> list(String q, Category category, int page, int size, String me) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Post> result = postRepository.search(q, category, pageable);
 
@@ -75,7 +75,7 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public Response get(Long id, Long me) {
+    public Response get(Long id, String me) {
         Post p = postRepository.findByPostId(id)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "post not found"));
 
@@ -86,7 +86,7 @@ public class PostService {
         return Response.from(p, likedBy(me, p), commentDtos);
     }
 
-    public Response update(Long id, UpdateRequest req, Long me) {
+    public Response update(Long id, UpdateRequest req, String me) {
         Post p = postRepository.findByPostId(id)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "post not found"));
 
@@ -102,7 +102,7 @@ public class PostService {
         return Response.from(p, likedBy(me, p), Collections.emptyList());
     }
 
-    public void delete(Long id, Long me) {
+    public void delete(Long id, String me) {
         Post p = postRepository.findByPostId(id)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "post not found"));
 
@@ -113,11 +113,11 @@ public class PostService {
         postRepository.delete(p);
     }
 
-    public int like(Long id, Long me) {
+    public int like(Long id, String me) {
         Post p = postRepository.findByPostId(id)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "post not found"));
 
-        User u = userRepository.findByUserId(me)
+        User u = userRepository.findByEmail(me)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "user not found"));
 
         if (postLikeRepository.existsByUserAndPost(u, p)) {
@@ -127,11 +127,11 @@ public class PostService {
         return (int) postLikeRepository.countByPost(p);
     }
 
-    public int unlike(Long id, Long me) {
+    public int unlike(Long id, String me) {
         Post p = postRepository.findByPostId(id)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "post not found"));
 
-        User u = userRepository.findByUserId(me)
+        User u = userRepository.findByEmail(me)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "user not found"));
 
         postLikeRepository.findByUserAndPost(u, p).ifPresent(postLikeRepository::delete);
@@ -142,7 +142,7 @@ public class PostService {
         Post p = postRepository.findByPostId(postId)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "post not found"));
 
-        User u = userRepository.findByUserId(req.getUserId())
+        User u = userRepository.findByEmail(req.getEmail())
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "user not found"));
 
         Comment saved = commentRepository.save(
@@ -151,9 +151,9 @@ public class PostService {
         return CommentResponse.of(saved);
     }
 
-    private boolean likedBy(Long me, Post p) {
+    private boolean likedBy(String me, Post p) {
         if (me == null) return false;
-        return userRepository.findByUserId(me)
+        return userRepository.findByEmail(me)
                 .map(u -> postLikeRepository.existsByUserAndPost(u, p))
                 .orElse(false);
     }

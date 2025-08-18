@@ -12,7 +12,7 @@ import java.util.Optional;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
 
-    // ✅ postId 필드명 기반 파생 쿼리
+
     Optional<Post> findByPostId(Long postId);
 
     Page<Post> findByCategory(Category category, Pageable pageable);
