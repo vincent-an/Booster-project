@@ -5,6 +5,7 @@ import fortuneCookie.booster.domain.user.dto.UserResponse;
 import fortuneCookie.booster.domain.user.entity.User;
 import fortuneCookie.booster.domain.user.entity.enums.Role;
 import fortuneCookie.booster.domain.user.repository.UserRepository;
+import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
