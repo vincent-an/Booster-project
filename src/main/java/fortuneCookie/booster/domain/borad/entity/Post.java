@@ -14,7 +14,6 @@ import java.util.List;
 @Getter @Setter
 @Table(name = "posts")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Builder
 public class Post {
 
     @Id
@@ -23,7 +22,7 @@ public class Post {
     private Long postId;
 
     @Column(nullable = false)
-    private String title;  // 게시글 제목 (필수)
+    private String title;
 
     @Column(columnDefinition = "TEXT")
     private String content;
@@ -49,11 +48,40 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
-    @ManyToMany(mappedBy = "likedPosts")
-    private List<User> likedByUsers = new ArrayList<>();
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostLike> postLikes = new ArrayList<>();
+
+    // 댓글 수
+    public int getCommentCount() {
+        return comments.size();
+    }
+
+    // 좋아요 수
+    public int getLikeCount() {
+        return postLikes.size();
+    }
+
+    // 현재 사용자의 특정 게시글 좋아요 여부
+    public boolean isLikedBy(User user) {
+        return postLikes.stream()
+                .anyMatch(postLike -> postLike.getUser().equals(user));
+    }
 
     public void setUser(User user) {
         this.user = user;
         user.getPosts().add(this);
+    }
+    public static Post of(String title,
+                          String content,
+                          Category category,
+                          Boolean anonymous,
+                          User author) {
+        Post p = new Post();                 // 클래스 내부라 protected 생성자 접근 가능
+        p.setTitle(title);
+        p.setContent(content);
+        p.setCategory(category);
+        p.setIsAnonymous(Boolean.TRUE.equals(anonymous));
+        p.setUser(author);                   // 연관관계 편의 메서드 있으면 그대로 사용
+        return p;
     }
 }

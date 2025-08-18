@@ -1,5 +1,4 @@
 package fortuneCookie.booster.domain.borad.entity;
-
 import fortuneCookie.booster.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -49,5 +48,16 @@ public class Comment {
     public void setPost(Post post) {
         this.post = post;
         post.getComments().add(this);
+    }
+    public static Comment of(String content,
+                             Boolean anonymous,
+                             User user,
+                             Post post) {
+        Comment c = new Comment();           // 클래스 내부라 protected 생성자 접근 가능
+        c.setContent(content);
+        c.setIsAnonymous(Boolean.TRUE.equals(anonymous));
+        c.setUser(user);
+        c.setPost(post);
+        return c;
     }
 }

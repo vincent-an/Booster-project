@@ -2,6 +2,7 @@ package fortuneCookie.booster.domain.user.entity;
 
 import fortuneCookie.booster.domain.borad.entity.Comment;
 import fortuneCookie.booster.domain.borad.entity.Post;
+import fortuneCookie.booster.domain.borad.entity.PostLike;
 import fortuneCookie.booster.domain.user.entity.enums.Department;
 import fortuneCookie.booster.domain.user.entity.enums.Gender;
 import jakarta.persistence.*;
@@ -53,11 +54,7 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Comment> comments = new ArrayList<>();
 
-    @ManyToMany
-    @JoinTable(
-            name = "user_post_likes",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "post_id")
-    )
-    private List<Post> likedPosts = new ArrayList<>();
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostLike> Likes = new ArrayList<>();
+
 }
