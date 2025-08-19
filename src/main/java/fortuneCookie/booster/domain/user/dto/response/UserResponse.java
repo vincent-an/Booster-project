@@ -1,4 +1,4 @@
-package fortuneCookie.booster.domain.user.dto;
+package fortuneCookie.booster.domain.user.dto.response;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;

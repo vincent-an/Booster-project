@@ -1,7 +1,7 @@
 package fortuneCookie.booster.domain.user.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fortuneCookie.booster.domain.user.dto.LoginRequest;
+import fortuneCookie.booster.domain.user.dto.request.LoginRequest;
 import fortuneCookie.booster.domain.user.entity.RefreshEntity;
 import fortuneCookie.booster.domain.user.repository.RefreshRepository;
 import jakarta.servlet.FilterChain;

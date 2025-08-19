@@ -1,7 +1,7 @@
 package fortuneCookie.booster.domain.user.service;
 
-import fortuneCookie.booster.domain.user.dto.JoinRequest;
-import fortuneCookie.booster.domain.user.dto.UserResponse;
+import fortuneCookie.booster.domain.user.dto.request.JoinRequest;
+import fortuneCookie.booster.domain.user.dto.response.UserResponse;
 import fortuneCookie.booster.domain.user.entity.User;
 import fortuneCookie.booster.domain.user.entity.enums.Role;
 import fortuneCookie.booster.domain.user.repository.UserRepository;

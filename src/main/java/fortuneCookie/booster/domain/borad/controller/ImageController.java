@@ -69,4 +69,27 @@ public class ImageController {
                     .body(Map.of("error", "삭제 중 알 수 없는 오류가 발생했습니다."));
         }
     }
+
+    @PutMapping("/update")
+    public ResponseEntity<?> updateImagesAtIndex(Authentication authentication,
+                                                 @RequestParam("currentImageUrls") List<String> currentUrls,
+                                                 @RequestParam("replaceIndex") int replaceIndex,
+                                                 @RequestParam("newImage") MultipartFile newImageFile) {
+        String email = authentication.getName();
+        log.info("이미지 수정 요청 - 사용자: {}, 인덱스: {}", email, replaceIndex);
+
+        try {
+            List<String> updateUrls = imageService.updateImageAtIndex(currentUrls, replaceIndex, newImageFile);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("updatedImageUrls", updateUrls);
+            response.put("introImgUrl", updateUrls.get(0));
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("이미지 수정 실패: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "이미지 수정 중 오류가 발생했습니다."));
+        }
+    }
 }

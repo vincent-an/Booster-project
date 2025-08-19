@@ -1,4 +1,4 @@
-package fortuneCookie.booster.domain.user.dto;
+package fortuneCookie.booster.domain.user.dto.request;
 
 import fortuneCookie.booster.domain.user.entity.enums.Department;
 import fortuneCookie.booster.domain.user.entity.enums.Gender;

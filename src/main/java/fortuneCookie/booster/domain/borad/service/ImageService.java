@@ -88,7 +88,42 @@ public class ImageService {
         }
     }
 
-    //확장자 검증 메서드
+
+    // 이미지 수정
+    public List<String> updateImageAtIndex(List<String> currentImageUrls, int replaceIndex,
+                                           MultipartFile newImageFile) throws IOException {
+        if (replaceIndex < 0 || replaceIndex >= currentImageUrls.size()) {
+            throw new IllegalArgumentException("유효하지 않은 이미지 인덱스입니다." +
+                    " (인덱스: " + replaceIndex + ", 리스트 크기: " + currentImageUrls.size() + ")");
+        }
+
+        // 기존 이미지 URL에서 key 추출
+        String oldImageUrl = currentImageUrls.get(replaceIndex);
+        String oldImageKey = extractKeyFromUrl(oldImageUrl);
+
+        log.info("이미지 교체 시작 - 기존 키: {}, 인덱스: {}", oldImageKey, replaceIndex);
+
+        // 새 이미지 업로드
+        String newImageUrl = imageUploadProcess(newImageFile);
+
+        try {
+            // 기존 이미지 S3에서 삭제
+            s3Config.amazonS3Client().deleteObject(bucket, oldImageKey);
+            log.info("기존 이미지 삭제 성공: {}", oldImageKey);
+        } catch (Exception e) {
+            log.warn("기존 이미지 삭제 실패: key = {}, error = {}", oldImageKey, e.getMessage());
+            // 새 이미지는 이미 업로드되었으므로 계속 진행
+        }
+
+        // 리스트 복사 및 특정 인덱스 교체
+        List<String> updatedUrls = new ArrayList<>(currentImageUrls);
+        updatedUrls.set(replaceIndex, newImageUrl);
+
+        log.info("이미지 교체 완료 - 새 URL: {}, 인덱스: {}", newImageUrl, replaceIndex);
+        return updatedUrls;
+    }
+
+    // 확장자 검증 메서드
     private String extractExt(MultipartFile file) {
         String ct = file.getContentType();
         switch (ct) {
@@ -103,4 +138,12 @@ public class ImageService {
     }
 
 
+    // URL에서 S3 키(파일명) 추출
+    private String extractKeyFromUrl(String imageUrl) {
+        try {
+            return imageUrl.substring(imageUrl.lastIndexOf('/') + 1);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("잘못된 이미지 URL 형식입니다: " + imageUrl);
+        }
+    }
 }
