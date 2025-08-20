@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
 @RestController
 @RequestMapping({
         "/booster/generalBoard",
@@ -24,7 +25,11 @@ public class PostController {
     }
 
     @GetMapping
-    public ResponseEntity<PageResponse<Response>> list(
+    public ResponseEntity<
+            fortuneCookie.booster.domain.borad.dto.PostDtos.PageResponse<
+                    fortuneCookie.booster.domain.borad.dto.PostDtos.Response
+                    >
+            > list(
             @RequestParam(name = "q", required = false, defaultValue = "") String q,
             @RequestParam(name = "category", required = false) Category category,
             @RequestParam(name = "page", required = false, defaultValue = "0") int page,

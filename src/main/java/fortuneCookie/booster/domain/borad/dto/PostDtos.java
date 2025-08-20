@@ -32,6 +32,7 @@ public class PostDtos {
         private int likeCount;
         private boolean likedByMe;
         private List<CommentResponse> comments;
+        private String authorName;
 
         public static Response from(Post p, boolean likedByMe, List<CommentResponse> comments) {
             return Response.builder()
@@ -46,6 +47,8 @@ public class PostDtos {
                     .likeCount(p.getPostLikes() != null ? p.getPostLikes().size() : 0)
                     .likedByMe(likedByMe)
                     .comments(comments)
+                    .authorName(Boolean.TRUE.equals(p.getIsAnonymous()) ? "익명"
+                            : (p.getUser() != null ? p.getUser().getNickname() : "탈퇴회원"))
                     .build();
         }
     }
@@ -84,6 +87,7 @@ public class PostDtos {
         private Long authorId;
         private String authorNickname;
         private LocalDateTime createdAt;
+        private String authorName;
 
         public static CommentResponse of(Comment c) {
             return CommentResponse.builder()
@@ -93,6 +97,8 @@ public class PostDtos {
                     .authorId(c.getUser() != null ? c.getUser().getUserId() : null)
                     .authorNickname(c.getUser() != null ? c.getUser().getNickname() : null)
                     .createdAt(c.getCreateCommentTime())
+                    .authorName(Boolean.TRUE.equals(c.getIsAnonymous()) ? "익명"
+                            : (c.getUser() != null ? c.getUser().getNickname() : "탈퇴회원"))
                     .build();
         }
     }

@@ -91,6 +91,8 @@ public class SecurityConfig {
                         .requestMatchers("/booster/login", "/booster/join", "/").permitAll()
 //                        .requestMatchers("/admin").hasRole("ADMIN")
                         .requestMatchers("/booster/reissue").permitAll() //reissue는 전체 접근 가능
+                        .requestMatchers("/booster/tmiBoard", "/booster/infoBoard", "/booster/promoBoard",
+                                "/booster/freeBoard", "/booster/generalBoard").permitAll() //게시판들과 목록 전체접근
                         .anyRequest().authenticated());
         //LoginFilter 추가 + 로그인 필터와 jwt 검증 충돌로 인한 변경
         http
@@ -110,4 +112,5 @@ public class SecurityConfig {
 
         return http.build();
     }
+
 }

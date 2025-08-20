@@ -84,4 +84,5 @@ public class User {
         this.department = department;
         this.role = role;
     }
+
 }

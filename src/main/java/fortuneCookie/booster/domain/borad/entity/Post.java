@@ -11,7 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Getter @Setter
+@Getter
+@Setter
 @Table(name = "posts")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Post {
@@ -27,6 +28,8 @@ public class Post {
     @Column(columnDefinition = "TEXT")
     private String content;
 
+    // 익명 여부
+    @Column(name = "is_anonymous")
     private Boolean isAnonymous = false;
 
     @Enumerated(EnumType.STRING)
@@ -41,47 +44,68 @@ public class Post {
     @CreationTimestamp
     private LocalDateTime createPostTime;
 
+    // 작성자 (필드명: user)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    // 댓글 목록
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
+    // 좋아요 목록
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostLike> postLikes = new ArrayList<>();
 
-    // 댓글 수
+    // ----- 편의 메서드 -----
+
     public int getCommentCount() {
         return comments.size();
     }
 
-    // 좋아요 수
     public int getLikeCount() {
         return postLikes.size();
     }
 
-    // 현재 사용자의 특정 게시글 좋아요 여부
-    public boolean isLikedBy(User user) {
-        return postLikes.stream()
-                .anyMatch(postLike -> postLike.getUser().equals(user));
+    /** 현재 사용자 기준으로 이 게시글을 좋아요 했는지 */
+    public boolean isLikedBy(User u) {
+        if (u == null) return false;
+        for (PostLike like : postLikes) {
+            if (like.getUser() != null && like.getUser().equals(u)) {
+                return true;
+            }
+        }
+        return false;
     }
 
+    /** 연관관계 설정 편의 메서드 */
     public void setUser(User user) {
         this.user = user;
-        user.getPosts().add(this);
+        if (user != null && user.getPosts() != null && !user.getPosts().contains(this)) {
+            user.getPosts().add(this);
+        }
     }
+
+    /** 표시용 이름 (선택 사용) */
+    @Transient
+    public String getDisplayAuthorName() {
+        if (Boolean.TRUE.equals(isAnonymous)) return "익명";
+        return (user != null) ? user.getNickname() : "탈퇴회원";
+    }
+
+    // ----- 생성 메서드 -----
+
     public static Post of(String title,
                           String content,
                           Category category,
                           Boolean anonymous,
                           User author) {
-        Post p = new Post();                 // 클래스 내부라 protected 생성자 접근 가능
+        Post p = new Post();
         p.setTitle(title);
         p.setContent(content);
         p.setCategory(category);
         p.setIsAnonymous(Boolean.TRUE.equals(anonymous));
-        p.setUser(author);                   // 연관관계 편의 메서드 있으면 그대로 사용
+        p.setUser(author); // 필드명은 user이므로 setUser 사용
         return p;
     }
 }
