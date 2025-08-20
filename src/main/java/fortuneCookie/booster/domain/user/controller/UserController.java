@@ -1,7 +1,7 @@
 package fortuneCookie.booster.domain.user.controller;
 
-import fortuneCookie.booster.domain.user.dto.JoinRequest;
-import fortuneCookie.booster.domain.user.dto.UserResponse;
+import fortuneCookie.booster.domain.user.dto.request.JoinRequest;
+import fortuneCookie.booster.domain.user.dto.response.UserResponse;
 import fortuneCookie.booster.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

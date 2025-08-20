@@ -56,6 +56,10 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	// aws s3 리소스 접근
+	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+//	implementation 'io.awspring.cloud:spring-cloud-aws-starter:3.4.0'
 }
 
 //dependencyManagement {
