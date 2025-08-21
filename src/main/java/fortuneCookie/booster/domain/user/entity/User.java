@@ -3,6 +3,7 @@ package fortuneCookie.booster.domain.user.entity;
 import fortuneCookie.booster.domain.borad.entity.Comment;
 import fortuneCookie.booster.domain.borad.entity.PostLike;
 import fortuneCookie.booster.domain.borad.entity.Post;
+import fortuneCookie.booster.domain.chatbot.entity.Chat;
 import fortuneCookie.booster.domain.user.entity.enums.Department;
 import fortuneCookie.booster.domain.user.entity.enums.Gender;
 import fortuneCookie.booster.domain.user.entity.enums.Role;
@@ -59,6 +60,9 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostLike> postLikes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Chat> chats = new ArrayList<>();
 
     // 편의 메서드 (사용자가 좋아요 누른 게시글 조회)
     public List<Post> getLikedPosts() {
