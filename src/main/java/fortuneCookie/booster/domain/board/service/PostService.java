@@ -1,15 +1,16 @@
-package fortuneCookie.booster.domain.borad.service;
+package fortuneCookie.booster.domain.board.service;
 
-import fortuneCookie.booster.domain.borad.dto.PostDtos.*;
-import fortuneCookie.booster.domain.borad.entity.Comment;
-import fortuneCookie.booster.domain.borad.entity.Post;
-import fortuneCookie.booster.domain.borad.entity.PostLike;
-import fortuneCookie.booster.domain.borad.entity.enums.Category;
-import fortuneCookie.booster.domain.borad.repository.CommentRepository;
-import fortuneCookie.booster.domain.borad.repository.PostLikeRepository;
-import fortuneCookie.booster.domain.borad.repository.PostRepository;
+import fortuneCookie.booster.domain.board.dto.*;
+import fortuneCookie.booster.domain.board.entity.Comment;
+import fortuneCookie.booster.domain.board.entity.Post;
+import fortuneCookie.booster.domain.board.entity.PostLike;
+import fortuneCookie.booster.domain.board.entity.enums.Category;
+import fortuneCookie.booster.domain.board.repository.CommentRepository;
+import fortuneCookie.booster.domain.board.repository.PostLikeRepository;
+import fortuneCookie.booster.domain.board.repository.PostRepository;
 import fortuneCookie.booster.domain.user.entity.User;
 import fortuneCookie.booster.domain.user.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,9 +22,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.FORBIDDEN;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Service
+@RequiredArgsConstructor
 @Transactional
 public class PostService {
 
@@ -32,15 +35,8 @@ public class PostService {
     private final PostLikeRepository postLikeRepository;
     private final UserRepository userRepository;
 
-    public PostService(PostRepository postRepository, CommentRepository commentRepository,
-                       PostLikeRepository postLikeRepository, UserRepository userRepository) {
-        this.postRepository = postRepository;
-        this.commentRepository = commentRepository;
-        this.postLikeRepository = postLikeRepository;
-        this.userRepository = userRepository;
-    }
-
-    public Response create(CreateRequest req) {
+    // 생성
+    public PostResponse create(PostCreateRequest req) {
         User author = userRepository.findByEmail(req.getEmail())
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "user not found"));
 
@@ -53,29 +49,33 @@ public class PostService {
         );
 
         Post saved = postRepository.save(post);
-        return Response.from(saved, false, Collections.emptyList());
+        return PostResponse.from(saved, false, Collections.emptyList());
     }
 
+    // 목록 (검색/카테고리)
     @Transactional(readOnly = true)
-    public PageResponse<Response> list(String q, Category category, int page, int size, String me) {
+    public PageResponse<PostResponse> list(String q, Category category, int page, int size, String me) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Post> result = postRepository.search(q, category, pageable);
 
-        List<Response> content = result.getContent().stream()
-                .map(p -> Response.from(p, likedBy(me, p), Collections.emptyList()))
+        List<PostResponse> content = result.getContent().stream()
+                .map(p -> PostResponse.from(p, likedBy(me, p), Collections.emptyList()))
                 .collect(Collectors.toList());
 
-        return PageResponse.<Response>builder()
+        return PageResponse.<PostResponse>builder()
                 .content(content)
-                .page(result.getNumber()).size(result.getSize())
+                .page(result.getNumber())
+                .size(result.getSize())
                 .totalElements(result.getTotalElements())
                 .totalPages(result.getTotalPages())
-                .first(result.isFirst()).last(result.isLast())
+                .first(result.isFirst())
+                .last(result.isLast())
                 .build();
     }
 
+    // 상세
     @Transactional(readOnly = true)
-    public Response get(Long id, String me) {
+    public PostResponse get(Long id, String me) {
         Post p = postRepository.findByPostId(id)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "post not found"));
 
@@ -83,14 +83,18 @@ public class PostService {
                 .map(CommentResponse::of)
                 .collect(Collectors.toList());
 
-        return Response.from(p, likedBy(me, p), commentDtos);
+        return PostResponse.from(p, likedBy(me, p), commentDtos);
     }
 
-    public Response update(Long id, UpdateRequest req, String me) {
+    // 수정
+    public PostResponse update(Long id, PostUpdateRequest req, String me) {
         Post p = postRepository.findByPostId(id)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "post not found"));
 
-        if (p.getUser() == null || !p.getUser().getUserId().equals(me)) {
+        // 작성자 검증: 이메일(me)로 사용자 조회 후 userId 비교
+        User editor = userRepository.findByEmail(me)
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "user not found"));
+        if (p.getUser() == null || !p.getUser().getUserId().equals(editor.getUserId())) {
             throw new ResponseStatusException(FORBIDDEN, "only author can edit");
         }
 
@@ -99,20 +103,24 @@ public class PostService {
         if (req.getCategory() != null) p.setCategory(req.getCategory());
         if (req.getAnonymous() != null) p.setIsAnonymous(req.getAnonymous());
 
-        return Response.from(p, likedBy(me, p), Collections.emptyList());
+        return PostResponse.from(p, likedBy(me, p), Collections.emptyList());
     }
 
+    // 삭제
     public void delete(Long id, String me) {
         Post p = postRepository.findByPostId(id)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "post not found"));
 
-        if (p.getUser() == null || !p.getUser().getUserId().equals(me)) {
+        User caller = userRepository.findByEmail(me)
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "user not found"));
+        if (p.getUser() == null || !p.getUser().getUserId().equals(caller.getUserId())) {
             throw new ResponseStatusException(FORBIDDEN, "only author can delete");
         }
 
         postRepository.delete(p);
     }
 
+    // 좋아요
     public int like(Long id, String me) {
         Post p = postRepository.findByPostId(id)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "post not found"));
@@ -127,6 +135,7 @@ public class PostService {
         return (int) postLikeRepository.countByPost(p);
     }
 
+    // 좋아요 취소
     public int unlike(Long id, String me) {
         Post p = postRepository.findByPostId(id)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "post not found"));
@@ -138,6 +147,7 @@ public class PostService {
         return (int) postLikeRepository.countByPost(p);
     }
 
+    // 댓글 추가
     public CommentResponse addComment(Long postId, CommentCreateRequest req) {
         Post p = postRepository.findByPostId(postId)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "post not found"));
@@ -151,6 +161,7 @@ public class PostService {
         return CommentResponse.of(saved);
     }
 
+    // 좋아요 여부
     private boolean likedBy(String me, Post p) {
         if (me == null) return false;
         return userRepository.findByEmail(me)

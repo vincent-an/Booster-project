@@ -1,8 +1,8 @@
 package fortuneCookie.booster.domain.user.entity;
 
-import fortuneCookie.booster.domain.borad.entity.Comment;
-import fortuneCookie.booster.domain.borad.entity.Post;
-import fortuneCookie.booster.domain.borad.entity.PostLike;
+import fortuneCookie.booster.domain.board.entity.Comment;
+import fortuneCookie.booster.domain.board.entity.Post;
+import fortuneCookie.booster.domain.board.entity.PostLike;
 import fortuneCookie.booster.domain.user.entity.enums.Department;
 import fortuneCookie.booster.domain.user.entity.enums.Gender;
 import fortuneCookie.booster.domain.user.entity.enums.Role;

@@ -1,6 +1,7 @@
-package fortuneCookie.booster.domain.borad.entity;
+package fortuneCookie.booster.domain.board.entity;
 
-import fortuneCookie.booster.domain.borad.entity.enums.Category;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import fortuneCookie.booster.domain.board.entity.enums.Category;
 import fortuneCookie.booster.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -31,6 +32,10 @@ public class Post {
     // 익명 여부
     @Column(name = "is_anonymous")
     private Boolean isAnonymous = false;
+
+    @JsonIgnore // 혹시 엔티티 직렬화될 때 노출 방지(우리는 DTO로 응답하니 안전빵)
+    @Column(name = "anonymous", nullable = true) // DB가 NOT NULL이면 그대로 둬도 됩니다
+    private Boolean anonymousMirror = false;
 
     @Enumerated(EnumType.STRING)
     private Category category;
@@ -107,5 +112,12 @@ public class Post {
         p.setIsAnonymous(Boolean.TRUE.equals(anonymous));
         p.setUser(author); // 필드명은 user이므로 setUser 사용
         return p;
+    }
+    @PrePersist
+    @PreUpdate
+    private void syncAnonymousMirror() {
+        if (this.isAnonymous == null) this.isAnonymous = false;
+        // 두 컬럼을 항상 동일하게 맞춰 DB 제약 위반 방지
+        this.anonymousMirror = this.isAnonymous;
     }
 }

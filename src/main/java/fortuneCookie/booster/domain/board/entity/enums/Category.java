@@ -1,4 +1,4 @@
-package fortuneCookie.booster.domain.borad.entity.enums;
+package fortuneCookie.booster.domain.board.entity.enums;
 
 public enum Category {
     FREE("자유 게시판"),

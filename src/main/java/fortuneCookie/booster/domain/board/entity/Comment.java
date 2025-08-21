@@ -1,4 +1,4 @@
-package fortuneCookie.booster.domain.borad.entity;
+package fortuneCookie.booster.domain.board.entity;
 
 import fortuneCookie.booster.domain.user.entity.User;
 import jakarta.persistence.*;

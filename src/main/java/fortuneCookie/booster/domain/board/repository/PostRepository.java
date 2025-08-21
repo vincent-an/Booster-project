@@ -1,7 +1,7 @@
-package fortuneCookie.booster.domain.borad.repository;
+package fortuneCookie.booster.domain.board.repository;
 
-import fortuneCookie.booster.domain.borad.entity.Post;
-import fortuneCookie.booster.domain.borad.entity.enums.Category;
+import fortuneCookie.booster.domain.board.entity.Post;
+import fortuneCookie.booster.domain.board.entity.enums.Category;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,7 +11,6 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
-
 
     Optional<Post> findByPostId(Long postId);
 

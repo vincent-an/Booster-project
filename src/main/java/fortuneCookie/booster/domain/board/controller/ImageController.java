@@ -1,6 +1,6 @@
-package fortuneCookie.booster.domain.borad.controller;
+package fortuneCookie.booster.domain.board.controller;
 
-import fortuneCookie.booster.domain.borad.service.ImageService;
+import fortuneCookie.booster.domain.board.service.ImageService;
 import fortuneCookie.booster.global.exception.ImageDeleteException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

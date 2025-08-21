@@ -1,4 +1,4 @@
-package fortuneCookie.booster.domain.borad.service;
+package fortuneCookie.booster.domain.board.service;
 
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.PutObjectRequest;

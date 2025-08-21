@@ -1,14 +1,15 @@
-package fortuneCookie.booster.domain.borad.controller;
+package fortuneCookie.booster.domain.board.controller;
 
-import fortuneCookie.booster.domain.borad.dto.PostDtos.*;
-import fortuneCookie.booster.domain.borad.entity.enums.Category;
-import fortuneCookie.booster.domain.borad.service.PostService;
+import fortuneCookie.booster.domain.board.dto.*;
+import fortuneCookie.booster.domain.board.entity.enums.Category;
+import fortuneCookie.booster.domain.board.service.PostService;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-
 @RestController
+@RequiredArgsConstructor
 @RequestMapping({
         "/booster/generalBoard",
         "/booster/freeBoard",
@@ -20,16 +21,9 @@ public class PostController {
 
     private final PostService postService;
 
-    public PostController(PostService postService) {
-        this.postService = postService;
-    }
-
+    // 목록
     @GetMapping
-    public ResponseEntity<
-            fortuneCookie.booster.domain.borad.dto.PostDtos.PageResponse<
-                    fortuneCookie.booster.domain.borad.dto.PostDtos.Response
-                    >
-            > list(
+    public ResponseEntity<PageResponse<PostResponse>> list(
             @RequestParam(name = "q", required = false, defaultValue = "") String q,
             @RequestParam(name = "category", required = false) Category category,
             @RequestParam(name = "page", required = false, defaultValue = "0") int page,
@@ -37,17 +31,19 @@ public class PostController {
             @RequestParam(name = "me", required = false) String me,
             HttpServletRequest request
     ) {
+        // 경로에 따라 category 강제 설정
         String path = request.getRequestURI();
         if (path.contains("freeBoard")) category = Category.FREE;
         else if (path.contains("promoBoard")) category = Category.PROMO;
         else if (path.contains("infoBoard")) category = Category.INFO;
         else if (path.contains("tmiBoard")) category = Category.TMI;
+
         return ResponseEntity.ok(postService.list(q, category, page, size, me));
     }
 
-    // 상세 조회
+    // 상세
     @GetMapping("/{post_id}")
-    public ResponseEntity<Response> get(
+    public ResponseEntity<PostResponse> get(
             @PathVariable(name = "post_id") Long id,
             @RequestParam(name = "me", required = false) String me
     ) {
@@ -56,21 +52,21 @@ public class PostController {
 
     // 생성
     @PostMapping
-    public ResponseEntity<Response> create(@RequestBody CreateRequest req) {
+    public ResponseEntity<PostResponse> create(@RequestBody PostCreateRequest req) {
         return ResponseEntity.ok(postService.create(req));
     }
 
-    // 수정  (서비스: update(id, req, me))
+    // 수정
     @PatchMapping("/{post_id}")
-    public ResponseEntity<Response> update(
+    public ResponseEntity<PostResponse> update(
             @PathVariable(name = "post_id") Long id,
-            @RequestBody UpdateRequest req,
+            @RequestBody PostUpdateRequest req,
             @RequestParam(name = "me") String me
     ) {
         return ResponseEntity.ok(postService.update(id, req, me));
     }
 
-    // 삭제  (서비스: delete(id, me))
+    // 삭제
     @DeleteMapping("/{post_id}")
     public ResponseEntity<Void> delete(
             @PathVariable(name = "post_id") Long id,

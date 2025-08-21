@@ -1,7 +1,7 @@
-package fortuneCookie.booster.domain.borad.repository;
+package fortuneCookie.booster.domain.board.repository;
 
-import fortuneCookie.booster.domain.borad.entity.Comment;
-import fortuneCookie.booster.domain.borad.entity.Post;
+import fortuneCookie.booster.domain.board.entity.Comment;
+import fortuneCookie.booster.domain.board.entity.Post;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
