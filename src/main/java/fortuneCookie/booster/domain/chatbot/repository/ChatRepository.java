@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+@Repository
 public interface ChatRepository extends JpaRepository<Chat, Long> {
 
     List<Chat> findByUser_UserIdAndSessionIdOrderByCreatedAtAsc(Long userId, String sessionId);

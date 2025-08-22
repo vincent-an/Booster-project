@@ -51,6 +51,9 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Column(name = "profile_image_url")
+    private String profileImageUrl;
+
     // 연관관계 매핑
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Post> posts = new ArrayList<>();
@@ -79,7 +82,8 @@ public class User {
             int admissionYear,
             Gender gender,
             Department department,
-            Role role
+            Role role,
+            String profileImageUrl
     ) {
         this.email = email;
         this.password = password;
@@ -88,5 +92,6 @@ public class User {
         this.gender = gender;
         this.department = department;
         this.role = role;
+        this.profileImageUrl = profileImageUrl;
     }
 }
