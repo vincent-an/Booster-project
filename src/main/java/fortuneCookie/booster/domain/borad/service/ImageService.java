@@ -68,6 +68,8 @@ public class ImageService {
         }
     }
 
+
+
     // 이미지 삭제
     public void deleteImages(List<String> imageKeys) {
         // 이미지 삭제 실패 시 이미지 url 리스트에 담음
@@ -123,6 +125,8 @@ public class ImageService {
         return updatedUrls;
     }
 
+
+
     // 확장자 검증 메서드
     private String extractExt(MultipartFile file) {
         String ct = file.getContentType();
@@ -144,6 +148,57 @@ public class ImageService {
             return imageUrl.substring(imageUrl.lastIndexOf('/') + 1);
         } catch (Exception e) {
             throw new IllegalArgumentException("잘못된 이미지 URL 형식입니다: " + imageUrl);
+        }
+    }
+
+    // 프로필 이미지 전용 업로드 메서드
+    public String uploadProfileImage(MultipartFile file) throws IOException {
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("파일이 비어있습니다.");
+        }
+
+        String ct = file.getContentType();
+        if (ct == null || !ALLOWED_CT.contains(ct)) {
+            throw new IllegalArgumentException("이미지 형식(jpeg/png/webp/gif)만 업로드 가능합니다.");
+        }
+
+        // 프로필 이미지는 파일명에 "profile-" 접두사 추가
+        String ext = extractExt(file);
+        String uuidFileName = "profile-" + UUID.randomUUID() + "." + ext;
+
+        // 지정된 로컬 경로에 저장
+        String localPath = localLocation + uuidFileName;
+        File localFile = new File(localPath);
+        file.transferTo(localFile);
+
+        try {
+            PutObjectRequest put = new PutObjectRequest(bucket, uuidFileName, localFile)
+                    .withCannedAcl(CannedAccessControlList.PublicRead);
+            s3Config.amazonS3Client().putObject(put);
+            String s3Url = s3Config.amazonS3Client().getUrl(bucket, uuidFileName).toString();
+
+            log.info("프로필 이미지 업로드 완료: {}", s3Url);
+            return s3Url;
+        } finally {
+            // S3 업로드 완료 후 로컬 파일 삭제
+            if (localFile.exists() && !localFile.delete()) {
+                log.warn("로컬 파일 삭제 실패: {}", localFile.getAbsolutePath());
+            }
+        }
+    }
+
+    // 프로필 이미지 삭제 메서드
+    public void deleteProfileImage(String imageUrl) {
+        if (imageUrl == null || imageUrl.contains("default-profile.png")) {
+            return;
+        }
+
+        try {
+            String key = extractKeyFromUrl(imageUrl);
+            s3Config.amazonS3Client().deleteObject(bucket, key);
+            log.info("프로필 이미지 삭제 성공: {}", key);
+        } catch (Exception e) {
+            log.error("프로필 이미지 삭제 실패: {}", imageUrl, e);
         }
     }
 }
