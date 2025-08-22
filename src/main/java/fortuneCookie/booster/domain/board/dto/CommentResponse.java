@@ -29,4 +29,5 @@ public class CommentResponse {
                         : (c.getUser() != null ? c.getUser().getNickname() : "탈퇴회원"))
                 .build();
     }
+
 }

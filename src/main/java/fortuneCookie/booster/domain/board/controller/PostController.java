@@ -102,4 +102,23 @@ public class PostController {
     ) {
         return ResponseEntity.ok(postService.addComment(id, req));
     }
+    @PatchMapping("/{post_id}/comments/{comment_id}")
+    public ResponseEntity<CommentResponse> updateComment(
+            @PathVariable("post_id") Long postId,
+            @PathVariable("comment_id") Long commentId,
+            @RequestBody CommentUpdateRequest req // content, anonymous, email
+    ) {
+        return ResponseEntity.ok(postService.updateComment(postId, commentId, req));
+    }
+
+    // 댓글 삭제
+    @DeleteMapping("/{post_id}/comments/{comment_id}")
+    public ResponseEntity<Void> deleteComment(
+            @PathVariable("post_id") Long postId,
+            @PathVariable("comment_id") Long commentId,
+            @RequestBody CommentDeleteRequest req // email
+    ) {
+        postService.deleteComment(postId, commentId, req);
+        return ResponseEntity.noContent().build();
+    }
 }

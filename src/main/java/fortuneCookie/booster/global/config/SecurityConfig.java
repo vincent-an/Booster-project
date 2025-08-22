@@ -83,6 +83,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 // 게시글 작성은 로그인 유저만(B 방식)
                 .requestMatchers(HttpMethod.POST, "/booster/posts").hasAnyRole("USER","ADMIN")
+                .requestMatchers(HttpMethod.PATCH, "/booster/**/**/comments").hasAnyRole("USER","ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/booster/**/**/comments").hasAnyRole("USER","ADMIN")
                 // 그 외는 인증 필요
                 .anyRequest().authenticated()
         );

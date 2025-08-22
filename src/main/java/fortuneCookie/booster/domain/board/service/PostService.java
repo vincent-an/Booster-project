@@ -168,4 +168,46 @@ public class PostService {
                 .map(u -> postLikeRepository.existsByUserAndPost(u, p))
                 .orElse(false);
     }
+    // PostService.java 안에 추가 (기존 코드 유지)
+
+    // 댓글 수정
+    public CommentResponse updateComment(Long postId, Long commentId, CommentUpdateRequest req) {
+        Post p = postRepository.findByPostId(postId)
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "post not found"));
+        User u = userRepository.findByEmail(req.getEmail())
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "user not found"));
+        Comment c = commentRepository.findById(commentId)
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "comment not found"));
+        if (c.getPost() == null || !c.getPost().getPostId().equals(p.getPostId())) {
+            // 잘못된 postId/commentId 조합이면 같은 에러로 처리
+            throw new ResponseStatusException(NOT_FOUND, "comment not found");
+        }
+        if (c.getUser() == null || !c.getUser().getUserId().equals(u.getUserId())) {
+            throw new ResponseStatusException(FORBIDDEN, "not comment author");
+        }
+        if (req.getContent() != null) c.setContent(req.getContent());
+        if (req.getAnonymous() != null) c.setIsAnonymous(req.getAnonymous());
+        Comment saved = commentRepository.save(c);
+        return CommentResponse.of(saved);
+    }
+
+    // 댓글 삭제
+    public void deleteComment(Long postId, Long commentId, CommentDeleteRequest req) {
+        Post p = postRepository.findByPostId(postId)
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "post not found"));
+        User u = userRepository.findByEmail(req.getEmail())
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "user not found"));
+        Comment c = commentRepository.findById(commentId)
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "comment not found"));
+        if (c.getPost() == null || !c.getPost().getPostId().equals(p.getPostId())) {
+            throw new ResponseStatusException(NOT_FOUND, "comment not found");
+        }
+        if (c.getUser() == null || !c.getUser().getUserId().equals(u.getUserId())) {
+            throw new ResponseStatusException(FORBIDDEN, "not comment author");
+        }
+
+        commentRepository.delete(c);
+    }
+
+
 }
