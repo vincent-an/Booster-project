@@ -1,15 +1,12 @@
-package fortuneCookie.booster.domain.user.dto;
+package fortuneCookie.booster.domain.user.dto.request;
 
 import fortuneCookie.booster.domain.user.entity.enums.Department;
 import fortuneCookie.booster.domain.user.entity.enums.Gender;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Getter
-@NoArgsConstructor
-public class JoinRequest {
-    private String email;
-    private String password;
+@Getter @Setter
+public class UpdateProfileRequest {
     private String nickname;
     private Gender gender;
     private int admissionYear;

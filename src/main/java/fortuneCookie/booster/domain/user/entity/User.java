@@ -3,6 +3,7 @@ package fortuneCookie.booster.domain.user.entity;
 import fortuneCookie.booster.domain.borad.entity.Comment;
 import fortuneCookie.booster.domain.borad.entity.PostLike;
 import fortuneCookie.booster.domain.borad.entity.Post;
+import fortuneCookie.booster.domain.chatbot.entity.Chat;
 import fortuneCookie.booster.domain.user.entity.enums.Department;
 import fortuneCookie.booster.domain.user.entity.enums.Gender;
 import fortuneCookie.booster.domain.user.entity.enums.Role;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 
 @Entity
 @Getter @Setter
+@Table(name = "users")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User {
 
@@ -49,6 +51,9 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Column(name = "profile_image_url")
+    private String profileImageUrl;
+
     // 연관관계 매핑
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Post> posts = new ArrayList<>();
@@ -58,6 +63,9 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostLike> postLikes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Chat> chats = new ArrayList<>();
 
     // 편의 메서드 (사용자가 좋아요 누른 게시글 조회)
     public List<Post> getLikedPosts() {
@@ -74,7 +82,8 @@ public class User {
             int admissionYear,
             Gender gender,
             Department department,
-            Role role
+            Role role,
+            String profileImageUrl
     ) {
         this.email = email;
         this.password = password;
@@ -83,5 +92,6 @@ public class User {
         this.gender = gender;
         this.department = department;
         this.role = role;
+        this.profileImageUrl = profileImageUrl;
     }
 }

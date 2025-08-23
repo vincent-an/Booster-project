@@ -1,4 +1,4 @@
-package fortuneCookie.booster.domain.user.dto;
+package fortuneCookie.booster.domain.user.dto.request;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
