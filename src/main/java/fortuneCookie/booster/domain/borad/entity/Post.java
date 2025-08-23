@@ -71,4 +71,16 @@ public class Post {
         this.user = user;
         user.getPosts().add(this);
     }
+
+    @Builder
+    public Post(String title, String content, Boolean isAnonymous, Category category,
+                List<String> imgURL, String introImgURL, User user) {
+        this.title = title;
+        this.content = content;
+        this.isAnonymous = isAnonymous != null ? isAnonymous : false;  // null이면 기본값 false
+        this.category = category;
+        this.imgURL = imgURL != null ? imgURL : new ArrayList<>();     // null이면 빈 리스트
+        this.introImgURL = introImgURL;
+        this.user = user;
+    }
 }

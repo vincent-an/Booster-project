@@ -34,7 +34,10 @@ public class JwtFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
         return Objects.equals("/booster/login", path) ||
                 Objects.equals("/booster/join", path) ||
+                Objects.equals("/booster/home", path) ||
                 Objects.equals("/booster/chatbot/**", path) ||
+                Objects.equals("/booster/post/intro", path) ||
+                Objects.equals("/booster/post/intro/category/**", path) ||
                 Objects.equals("/", path);
     }
 
