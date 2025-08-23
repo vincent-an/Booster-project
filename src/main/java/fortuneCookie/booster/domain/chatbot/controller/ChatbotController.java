@@ -18,10 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.attribute.UserPrincipal;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -165,20 +162,56 @@ public class ChatbotController {
     }
 
     private String formatDocuments(List<Document> documents) {
+        if (documents == null || documents.isEmpty()) {
+            return "관련 문서를 찾을 수 없습니다.";
+        }
+
         return documents.stream()
+                .filter(doc -> doc != null && doc.getText() != null && !doc.getText().trim().isEmpty())
                 .map(doc -> {
-                    String source = doc.getMetadata().get("source").toString();
-                    String category = doc.getMetadata().get("category").toString();
-                    String content = doc.getText();
+                    Map<String, Object> metadata = doc.getMetadata();
+
+                    String source = "알 수 없는 출처";
+                    String category = "일반";
+
+                    if (metadata != null) {
+                        Object sourceObj = metadata.get("source");
+                        Object categoryObj = metadata.get("category");
+
+                        if (sourceObj != null) {
+                            source = sourceObj.toString();
+                        }
+                        if (categoryObj != null) {
+                            category = categoryObj.toString();
+                        }
+                    }
+
+                    String content = doc.getText().trim();
                     return String.format("[출처: %s (%s)]\n%s", source, category, content);
                 })
                 .collect(Collectors.joining("\n\n---\n\n"));
     }
 
     private List<String> extractSources(List<Document> documents) {
+        if (documents == null || documents.isEmpty()) {
+            return new ArrayList<>();
+        }
+
         return documents.stream()
-                .map(doc -> doc.getMetadata().get("source").toString())
+                .filter(doc -> doc != null)
+                .map(doc -> {
+                    Map<String, Object> metadata = doc.getMetadata();
+                    if (metadata != null) {
+                        Object sourceObj = metadata.get("source");
+                        if (sourceObj != null) {
+                            return sourceObj.toString();
+                        }
+                    }
+                    return null;
+                })
+                .filter(source -> source != null && !source.isEmpty())
                 .distinct()
                 .collect(Collectors.toList());
     }
+
 }

@@ -14,6 +14,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
 import org.springframework.jdbc.core.simple.JdbcClient;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -26,17 +30,12 @@ public class BoosterDataLoader {
     private final VectorStore vectorStore;
     private final JdbcClient jdbcClient;
 
-    @Value("classpath:/notices/2025-2학기_수강_가이드.pdf")
-    private Resource courseGuide;
 
-    @Value("classpath:/notices/2025년_전과제도.pdf")
-    private Resource majorChange;
+    @Value("classpath:/notices/*.pdf")
+    private Resource[] pdfResources;
 
-    @Value("classpath:/notices/2025학년도_학부제_안내.pdf")
-    private Resource departmentGuide;
-
-    @Value("classpath:/notices/2025학년도 2학기_수강신청과목.pdf")
-    private Resource courseRegistration;
+    @Value("classpath:/notices/*.txt")
+    private Resource[] txtResources;
 
     @PostConstruct
     public void init() {
@@ -49,7 +48,7 @@ public class BoosterDataLoader {
 
             if (count == 0) {
                 log.info("을지대학교 공지사항 데이터 로딩 시작...");
-                loadAllNoticeDocuments();
+                loadAllDocuments();
             } else {
                 log.info("이미 데이터가 로딩되어 있습니다. 건너뜁니다.");
             }
@@ -58,21 +57,31 @@ public class BoosterDataLoader {
         }
     }
 
-    private void loadAllNoticeDocuments() {
-        // 모든 PDF 파일들을 리스트로 정의 (변경된 변수명 반영)
-        List<PDFInfo> pdfFiles = Arrays.asList(
-                new PDFInfo(courseGuide, "2025-2학기-수강-가이드.pdf", "course_guide", "수강 가이드"),
-                new PDFInfo(majorChange, "2025년-전과제도.pdf", "major_change", "전과/소속변경"),
-                new PDFInfo(departmentGuide, "2025학년도-학부제-안내.pdf", "department_guide", "학부제"),
-                new PDFInfo(courseRegistration, "2025학년도-2학기-수강신청과목.pdf", "course_registration", "수강신청")
-        );
-
+    private void loadAllDocuments() {
         int totalProcessed = 0;
 
-        // 각 pdf 파일 처리
-        for (PDFInfo pdfInfo : pdfFiles) {
+        // PDF 파일 처리
+        totalProcessed += loadPdfDocuments();
+
+        // TXT 파일 처리
+        totalProcessed += loadTxtDocuments();
+
+        log.info("전체 로딩 완료: 총 {} 개 문서 청크가 벡터 데이터베이스에 저장됨", totalProcessed);
+    }
+
+    // PDF 파일 읽기
+    private int loadPdfDocuments() {
+        int processed = 0;
+
+        log.info("PDF 파일 로딩 시작 - 총 {}개 파일", pdfResources.length);
+
+        for (Resource resource : pdfResources) {
             try {
-                // 1. pdf 파일 읽기 설정
+                String filename = resource.getFilename();
+                String displayName = filename.replace(".pdf", "").replace("_", "-");
+
+                log.info("PDF 처리 중: {}", displayName);
+
                 PdfDocumentReaderConfig config = PdfDocumentReaderConfig.builder()
                         .withPageTopMargin(0)
                         .withPageExtractedTextFormatter(ExtractedTextFormatter.builder()
@@ -81,58 +90,96 @@ public class BoosterDataLoader {
                         .withPagesPerDocument(1)
                         .build();
 
-                // 2. pdf 문서 로드
-                PagePdfDocumentReader pdfReader = new PagePdfDocumentReader(pdfInfo.resource, config);
+                PagePdfDocumentReader pdfReader = new PagePdfDocumentReader(resource, config);
                 List<Document> documents = pdfReader.get();
-                log.info("PDF 페이지 수: {} - {}", documents.size(), pdfInfo.displayName);
+                log.info("PDF 페이지 수: {} - {}", documents.size(), displayName);
 
-                // 3. 문서 page 분할
                 TokenTextSplitter splitter = new TokenTextSplitter(1000, 300, 5, 4000, true);
                 List<Document> splitDocuments = splitter.apply(documents);
 
-                // 4. 메타데이터 추가 (각 pdf별로 구분)
-                addMetadataToDocuments(splitDocuments, pdfInfo);
-
-                // 5. 벡터 스토어에 저장 (OpenAI 임베딩 + PGVector 저장)
+                addSimpleMetadata(splitDocuments, displayName);
                 vectorStore.accept(splitDocuments);
 
-                totalProcessed += splitDocuments.size();
-                log.info("로딩 완료: {} - {} 개 문서 청크 저장됨", pdfInfo.displayName, splitDocuments.size());
+                processed += splitDocuments.size();
+                log.info("PDF 로딩 완료: {} - {} 개 문서 청크 저장됨", displayName, splitDocuments.size());
 
-                // 각 파일 처리 후 잠시 대기 (OpenAI API 호출 제한 고려)
                 Thread.sleep(1000);
 
             } catch (Exception e) {
-                log.error("PDF 로딩 실패: {}", pdfInfo.displayName, e);
+                log.error("PDF 로딩 실패: {}", resource.getFilename(), e);
             }
         }
-        log.info("전체 로딩 완료: 총 {} 개 문서 청크가 벡터 데이터베이스에 저장됨", totalProcessed);
-    }
-    // 신뢰성, 분류, 사용자 경험, 디버깅에 활용되는 메타데이터 추가
-    private void addMetadataToDocuments(List<Document> documents, PDFInfo pdfInfo) {
-        documents.forEach(doc -> {
-            doc.getMetadata().put("source", pdfInfo.displayName);
-            doc.getMetadata().put("type", pdfInfo.type);
-            doc.getMetadata().put("category", pdfInfo.category);
-            doc.getMetadata().put("loaded_at", LocalDateTime.now().toString());
-            doc.getMetadata().put("university", "을지대학교");
-            doc.getMetadata().put("year", "2025");
-        });
+
+        log.info("PDF 파일 로딩 완료 - {} 개 청크 처리됨", processed);
+        return processed;
     }
 
-    // PDF 정보를 담는 내부 클래스
-    private static class PDFInfo {
-        final Resource resource;
-        final String displayName;
-        final String type;
-        final String category;
+    // TXT 파일 로딩
+    private int loadTxtDocuments() {
+        int processed = 0;
 
-        PDFInfo(Resource resource, String displayName, String type, String category) {
-            this.resource = resource;
-            this.displayName = displayName;
-            this.type = type;
-            this.category = category;
+        log.info("TXT 파일 로딩 시작 - 총 {}개 파일", txtResources.length);
+
+        for (Resource resource : txtResources) {
+            try {
+                String filename = resource.getFilename();
+                String displayName = filename.replace(".txt", "").replace("_", "-");
+
+                log.info("TXT 처리 중: {}", displayName);
+
+                // TXT 파일 내용 읽기
+                String content = readTxtFile(resource);
+                log.info("TXT 파일 크기: {} 문자 - {}", content.length(), displayName);
+
+                // Document 생성
+                Document document = new Document(content);
+
+                // 문서 분할
+                TokenTextSplitter splitter = new TokenTextSplitter(1000, 300, 5, 4000, true);
+                List<Document> splitDocuments = splitter.apply(List.of(document));
+
+                // 메타데이터 추가
+                addSimpleMetadata(splitDocuments, displayName);
+
+                vectorStore.accept(splitDocuments);
+
+                processed += splitDocuments.size();
+                log.info("TXT 로딩 완료: {} - {} 개 문서 청크 저장됨", displayName, splitDocuments.size());
+
+                Thread.sleep(1000);
+
+            } catch (Exception e) {
+                log.error("TXT 로딩 실패: {}", resource.getFilename(), e);
+            }
+        }
+
+        log.info("TXT 파일 로딩 완료 - {} 개 청크 처리됨", processed);
+        return processed;
+    }
+
+    // TXT 파일 읽기 메서드
+    private String readTxtFile(Resource resource) throws IOException {
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8))) {
+
+            StringBuilder content = new StringBuilder();
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+                content.append(line).append("\n");
+            }
+
+            return content.toString();
         }
     }
 
+    // 공통 메타데이터 추가
+    private void addSimpleMetadata(List<Document> documents, String displayName) {
+        documents.forEach(doc -> {
+            doc.getMetadata().put("source", displayName);
+            doc.getMetadata().put("loaded_at", LocalDateTime.now().toString());
+            doc.getMetadata().put("university", "을지대학교");
+        });
+    }
 }
+
