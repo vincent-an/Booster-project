@@ -14,7 +14,6 @@ import java.util.List;
 @Getter @Setter
 @Table(name = "posts")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Builder
 public class Post {
 
     @Id
@@ -49,11 +48,39 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
-    @ManyToMany(mappedBy = "likedPosts")
-    private List<User> likedByUsers = new ArrayList<>();
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostLike> postLikes = new ArrayList<>();
+
+    // 댓글 수
+    public int getCommentCount() {
+        return comments.size();
+    }
+
+    // 좋아요 수
+    public int getLikeCount() {
+        return postLikes.size();
+    }
+
+    // 현재 사용자의 특정 게시글 좋아요 여부
+    public boolean isLikedBy(User user) {
+        return postLikes.stream()
+                .anyMatch(postLike -> postLike.getUser().equals(user));
+    }
 
     public void setUser(User user) {
         this.user = user;
         user.getPosts().add(this);
+    }
+
+    @Builder
+    public Post(String title, String content, Boolean isAnonymous, Category category,
+                List<String> imgURL, String introImgURL, User user) {
+        this.title = title;
+        this.content = content;
+        this.isAnonymous = isAnonymous != null ? isAnonymous : false;  // null이면 기본값 false
+        this.category = category;
+        this.imgURL = imgURL != null ? imgURL : new ArrayList<>();     // null이면 빈 리스트
+        this.introImgURL = introImgURL;
+        this.user = user;
     }
 }

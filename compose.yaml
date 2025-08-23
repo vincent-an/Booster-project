@@ -1,0 +1,15 @@
+services:
+  pgvector:
+    image: 'pgvector/pgvector:pg16'
+    container_name: pgvector-chatbot
+    environment:
+      - 'POSTGRES_DB=booster-chatbot-db'    # DB 이름 변경
+      - 'POSTGRES_PASSWORD=booster'
+      - 'POSTGRES_USER=booster'
+    ports:
+      - '5433:5432'
+    volumes:
+      - pgvector_data:/var/lib/postgresql/data
+
+volumes:
+  pgvector_data:
