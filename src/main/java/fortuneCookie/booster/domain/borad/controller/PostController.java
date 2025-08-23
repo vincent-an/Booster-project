@@ -129,4 +129,21 @@ public class PostController {
         log.info("{} 카테고리 게시판 조회 완료 - {} 개 게시글", category, posts.size());
         return ResponseEntity.ok(posts);
     }
+
+    // 검색 기능
+    @GetMapping("/search")
+    public ResponseEntity<List<PostIntroResponse>> searchPosts(
+            @RequestParam("keyword") String keyword) {
+
+        try {
+            List<PostIntroResponse> searchResults = postService.searchPosts(keyword);
+
+            log.info("게시글 검색 성공 - 키워드: '{}', 결과 수: {}", keyword, searchResults.size());
+            return ResponseEntity.ok(searchResults);
+
+        } catch (Exception e) {
+            log.error("게시글 검색 실패 - 키워드: '{}'", keyword, e);
+            throw new RuntimeException("게시글 검색에 실패했습니다.");
+        }
+    }
 }

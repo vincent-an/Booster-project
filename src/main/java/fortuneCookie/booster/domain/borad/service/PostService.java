@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -170,6 +171,31 @@ public class PostService {
         List<Post> posts = postRepository.findByCategoryOrderByCreatePostTimeDesc(category);
 
         return posts.stream()
+                .map(PostIntroResponse::from)
+                .collect(Collectors.toList());
+    }
+
+    // 검색기능
+    @Transactional(readOnly = true)
+    public List<PostIntroResponse> searchPosts(String keyword) {
+        log.info("게시글 검색 요청 - 키워드: {}", keyword);
+
+        if (keyword == null || keyword.trim().isEmpty()) {
+            log.warn("검색 키워드가 비어있습니다.");
+            return new ArrayList<>();
+        }
+
+        // 키워드 전처리 (앞뒤 공백 제거)
+        String trimmedKeyword = keyword.trim();
+
+        // 제목과 내용 둘 중 해당되는 키워드로 검색
+        List<Post> searchResults = postRepository
+                .findByTitleContainingOrContentContainingOrderByCreatePostTimeDesc(
+                        trimmedKeyword, trimmedKeyword);
+
+        log.info("검색 완료 - 키워드: '{}', 결과 수: {}", trimmedKeyword, searchResults.size());
+
+        return searchResults.stream()
                 .map(PostIntroResponse::from)
                 .collect(Collectors.toList());
     }
