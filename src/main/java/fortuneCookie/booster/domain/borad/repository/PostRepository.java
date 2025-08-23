@@ -27,4 +27,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             "LEFT JOIN FETCH p.user " +
             "ORDER BY SIZE(p.postLikes) DESC, p.createPostTime DESC")
     List<Post> findTop10ByOrderByLikeCountDesc();
+
+    List<Post> findByTitleContainingOrContentContainingOrderByCreatePostTimeDesc(
+            String titleKeyword, String contentKeyword);
 }

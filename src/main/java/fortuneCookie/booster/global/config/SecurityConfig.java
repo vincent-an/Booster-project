@@ -89,7 +89,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/booster/login", "/booster/join", "/booster/home", "/booster/chatbot/**",
-                                "/booster/post/intro", "/booster/post/intro/category/**").permitAll()
+                                "/booster/post/intro", "/booster/post/intro/category/**", "/booster/search").permitAll()
 //                        .requestMatchers("/admin").hasRole("ADMIN")
                         .requestMatchers("/booster/reissue").permitAll() //reissue는 전체 접근 가능
                         .anyRequest().authenticated());

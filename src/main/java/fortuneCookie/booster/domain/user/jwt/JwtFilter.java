@@ -38,6 +38,7 @@ public class JwtFilter extends OncePerRequestFilter {
                 Objects.equals("/booster/chatbot/**", path) ||
                 Objects.equals("/booster/post/intro", path) ||
                 Objects.equals("/booster/post/intro/category/**", path) ||
+                Objects.equals("/booster/search", path) ||
                 Objects.equals("/", path);
     }
 
