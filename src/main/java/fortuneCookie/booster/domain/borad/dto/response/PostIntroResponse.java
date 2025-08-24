@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @Getter
 @Builder
@@ -29,7 +30,7 @@ public class PostIntroResponse {
 
     private Category category;
 
-    private LocalDateTime createPostTime;
+    private ZonedDateTime createPostTime;
 
     public static PostIntroResponse from(Post post) {
         return PostIntroResponse.builder()

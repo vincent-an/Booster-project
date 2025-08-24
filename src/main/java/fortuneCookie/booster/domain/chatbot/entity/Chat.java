@@ -7,6 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.ai.chat.messages.MessageType;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @Entity
 @Getter @Setter
@@ -35,7 +36,7 @@ public class Chat {
 
     @CreationTimestamp
     @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    private ZonedDateTime createdAt;
 
     @Builder
     private Chat(User user, String sessionId, MessageType messageType, String content) {

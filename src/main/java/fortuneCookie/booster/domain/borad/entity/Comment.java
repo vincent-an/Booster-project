@@ -6,6 +6,7 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @Entity
 @Table(name = "comments")
@@ -23,7 +24,7 @@ public class Comment {
     private Boolean isAnonymous = true;
 
     @CreationTimestamp
-    private LocalDateTime createCommentTime;
+    private ZonedDateTime createCommentTime;
 
     // 연관관계 매핑
     @ManyToOne(fetch = FetchType.LAZY)
