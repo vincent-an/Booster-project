@@ -1,5 +1,6 @@
 package fortuneCookie.booster.global.config;
 
+import org.springframework.http.HttpMethod;
 import fortuneCookie.booster.domain.user.jwt.CustomLogoutFilter;
 import fortuneCookie.booster.domain.user.jwt.JwtFilter;
 import fortuneCookie.booster.domain.user.jwt.JwtUtil;
@@ -58,7 +59,7 @@ public class SecurityConfig {
 
                                 CorsConfiguration configuration =  new CorsConfiguration();
                                 //프론트에서 보낼 3000번 포트 허용
-                                configuration.setAllowedOriginPatterns(List.of("http://127.0.0.1:3000", "http://localhost:3000"));
+                                configuration.setAllowedOrigins(List.of("http://127.0.0.1:3000", "http://localhost:3000", "https://forchuncookie.netlify.app"));
                                 //허용할 메서드는 get, post, 등등 다 허용
                                 configuration.setAllowedMethods(Collections.singletonList("*"));
                                 //프론트에서 Credentials 설정을 하면 true로 바꿔줘야 함
@@ -88,6 +89,7 @@ public class SecurityConfig {
         //경로별 인가 작업
         http
                 .authorizeHttpRequests((auth) -> auth
+			.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/booster/login", "/booster/join", "/booster/home", "/booster/chatbot/**",
                                 "/booster/post/intro", "/booster/post/intro/category/**", "/booster/search").permitAll()
 //                        .requestMatchers("/admin").hasRole("ADMIN")

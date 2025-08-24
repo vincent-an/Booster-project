@@ -11,7 +11,7 @@ public class CorsMvcConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry corsRegistry) {
         //controller에서 cors문제 처리
         corsRegistry.addMapping("/**")  // 모든 경로에 대해 CORS 설정
-                .allowedOriginPatterns("http://localhost:3000", "http://127.0.0.1:3000");
+                .allowedOriginPatterns("http://localhost:3000", "http://127.0.0.1:3000", "https://forchuncookie.netlify.app");
         //"https://leftlion.netlify.app" 처럼 프론트 배포 url 추가
 
     }

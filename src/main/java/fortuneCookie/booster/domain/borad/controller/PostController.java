@@ -111,7 +111,7 @@ public class PostController {
     }
 
     // 전체 게시글 조회
-    @GetMapping("post/intro")
+    @GetMapping("/post/intro")
     public ResponseEntity<List<PostIntroResponse>> getAllPostsIntro() {
         List<PostIntroResponse> posts = postService.getAllPostsIntro();
 
@@ -120,7 +120,7 @@ public class PostController {
     }
 
     // 카테고리별 게시글 조회
-    @GetMapping("post/intro/category/{category}")
+    @GetMapping("/post/intro/category/{category}")
     public ResponseEntity<List<PostIntroResponse>> getPostsIntroByCategory(
             @PathVariable Category category) {
 

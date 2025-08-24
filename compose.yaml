@@ -1,15 +1,40 @@
+# compose.yaml (최종 솔루션)
+
+version: '3.8'
+
 services:
-  pgvector:
+  db:
     image: 'pgvector/pgvector:pg16'
-    container_name: pgvector-chatbot
+    container_name: booster-db-container
+    restart: always
     environment:
-      - 'POSTGRES_DB=booster-chatbot-db'    # DB 이름 변경
+      - 'POSTGRES_DB=booster-db'
       - 'POSTGRES_PASSWORD=booster'
       - 'POSTGRES_USER=booster'
     ports:
       - '5433:5432'
     volumes:
-      - pgvector_data:/var/lib/postgresql/data
+      - ./pgvector_data:/var/lib/postgresql/data
+    # 1. DB가 연결받을 준비가 됐는지 5초마다 확인하는 healthcheck 추가
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U booster -d booster-db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    container_name: booster-app-container
+    restart: always
+    ports:
+      - "8080:8080"
+    volumes:
+      - /home/ubuntu/images:/home/ubuntu/images
+    # 2. DB 상태가 'healthy'가 될 때까지 앱 시작을 대기하도록 수정
+    depends_on:
+      db:
+        condition: service_healthy
 
 volumes:
   pgvector_data:
+
