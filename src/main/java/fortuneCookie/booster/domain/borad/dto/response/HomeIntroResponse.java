@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @Getter
 @Builder
@@ -28,7 +29,7 @@ public class HomeIntroResponse {
 
     private String authorNickname;
 
-    private LocalDateTime createPostTime;
+    private ZonedDateTime createPostTime;
 
     private int commentCount;
 

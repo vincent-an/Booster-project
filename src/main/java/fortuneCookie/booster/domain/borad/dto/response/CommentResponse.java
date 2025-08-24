@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Getter
@@ -26,7 +27,7 @@ public class CommentResponse {
 
     private String formattedDate;
 
-    private LocalDateTime createCommentTime;
+    private ZonedDateTime createCommentTime;
 
     private Boolean isAuthor; // 글쓴이 여부 (true: 글쓴이, false: 일반 댓글)
 
@@ -56,7 +57,7 @@ public class CommentResponse {
                 .content(comment.getContent())
                 .isAnonymous(comment.getIsAnonymous())
                 .authorNickname(nickname)
-                .formattedDate(formatDate(comment.getCreateCommentTime()))
+                .formattedDate(formatDate(comment.getCreateCommentTime().toLocalDateTime()))
                 .createCommentTime(comment.getCreateCommentTime())
                 .isAuthor(isPostAuthor)
                 .build();

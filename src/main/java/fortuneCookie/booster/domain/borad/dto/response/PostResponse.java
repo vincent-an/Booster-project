@@ -8,6 +8,7 @@ import fortuneCookie.booster.domain.user.entity.User;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class PostResponse {
     private String authorNickname;
     private String introImgURL;
     private List<String> imgURL = new ArrayList<>();
-    private LocalDateTime createPostTime;
+    private ZonedDateTime createPostTime;
     private int commentCount;
     private int likeCount;
     // 현재 사용자의 좋아요 여부
