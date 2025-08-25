@@ -3,7 +3,9 @@ package fortuneCookie.booster.domain.user.jwt;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fortuneCookie.booster.domain.user.dto.request.LoginRequest;
 import fortuneCookie.booster.domain.user.entity.RefreshEntity;
+import fortuneCookie.booster.domain.user.entity.User;
 import fortuneCookie.booster.domain.user.repository.RefreshRepository;
+import fortuneCookie.booster.domain.user.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,6 +23,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.Map;
 
 @Slf4j
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
@@ -28,11 +31,13 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
     private final RefreshRepository refreshRepository;
+    private final UserRepository userRepository;
 
-    public LoginFilter(AuthenticationManager authenticationManager, JwtUtil jwtUtil, RefreshRepository refreshRepository) {
+    public LoginFilter(AuthenticationManager authenticationManager, JwtUtil jwtUtil, RefreshRepository refreshRepository, UserRepository userRepository) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.refreshRepository = refreshRepository;
+        this.userRepository = userRepository;
         setFilterProcessesUrl("/booster/login"); // 로그인 경로를 "/booster/login"으로 변경
     }
 
@@ -66,6 +71,10 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         //유저 정보
         String email = authentication.getName();
 
+        // 새로 추가
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
         GrantedAuthority auth = iterator.next();
@@ -75,14 +84,35 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String access = jwtUtil.createJwt("access", email, role, 600000L);
         String refresh = jwtUtil.createJwt("refresh", email, role, 86400000L);
 
+
+
         //Refresh 토큰 저장
         addRefreshEntity(email, refresh, 86400000L);
 
-        //응답 설정
-        log.info("✅ access 토큰 생성 완료: {}", access);
+        // 응답 설정 - JSON으로 사용자 정보 포함
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
         response.setHeader("access", access);
         response.addCookie(createCookie("refresh", refresh));
+
+        // JSON 응답 생성
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonResponse = objectMapper.writeValueAsString(Map.of(
+                "accessToken", access,
+                "userId", user.getUserId(),
+                "nickname", user.getNickname(),
+                "message", "로그인 성공"
+        ));
+
+        response.getWriter().write(jsonResponse);
         response.setStatus(HttpStatus.OK.value());
+
+        log.info("✅ 로그인 성공 - 사용자: {}, ID: {}", email, user.getUserId());
+
+
+
+        //응답 설정
+        log.info("✅ access 토큰 생성 완료: {}", access);
     }
 
     //로그인 실패시 실행하는 메소드

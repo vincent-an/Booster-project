@@ -35,7 +35,7 @@ public class PostResponse {
     // Post -> PostResponse로 변환하는 정적 메서드
     public static PostResponse from(Post post, User currentUser, String message) {
         return PostResponse.builder()
-                .authorId(post.getIsAnonymous() ? null : post.getUser().getUserId()) // 익명이면 null
+                .authorId(post.getUser().getUserId())
                 .postId(post.getPostId())
                 .title(post.getTitle())
                 .content(post.getContent())
