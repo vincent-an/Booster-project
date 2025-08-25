@@ -17,6 +17,8 @@ import java.time.format.DateTimeFormatter;
 @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class CommentResponse {
 
+    private Long commentUserId; // 방금 추가
+
     private Long commentId;
 
     private String content;
@@ -53,6 +55,7 @@ public class CommentResponse {
         }
 
         return CommentResponse.builder()
+                .commentUserId(comment.getUser().getUserId())
                 .commentId(comment.getCommentId())
                 .content(comment.getContent())
                 .isAnonymous(comment.getIsAnonymous())
